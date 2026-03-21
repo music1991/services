@@ -38,6 +38,15 @@ app.get('/api/online-ids', (req, res) => {
   res.json(Array.from(usersOnline.values()));
 });
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    storage: process.env.CLOUDINARY_NAME ? 'cloudinary' : 'local'
+  });
+});
 // 4. EL CAMBIO CLAVE PARA VERCEL:
 // Solo hacemos el .listen si NO estamos en producción (Vercel)
 // Si estamos en Vercel, él se encarga de manejar la 'app' exportada.
