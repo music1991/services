@@ -6,9 +6,11 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 let storage;
 
-const isProduction = process.env.NODE_ENV === 'production';
+// 1. CAMBIO CLAVE: Detectar Cloudinary por sus variables, no por el entorno
+const hasCloudinaryConfig = process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_KEY;
 
-if (isProduction) {
+if (hasCloudinaryConfig) {
+  // CONFIGURACIÓN PARA VERCEL (NUBE)
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_KEY,
@@ -19,14 +21,18 @@ if (isProduction) {
     cloudinary: cloudinary,
     params: {
       folder: 'recursos_app',
-      allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png'],
-      resource_type: 'auto'
+      allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
+      resource_type: 'auto' // Esto es vital para que acepte PDFs
     },
   });
+  console.log("Almacenamiento configurado en Cloudinary");
 
 } else {
-  const uploadDir = './uploads';
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  // CONFIGURACIÓN PARA TU PC (LOCAL)
+  const uploadDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
 
   storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),
@@ -35,7 +41,7 @@ if (isProduction) {
       cb(null, `${Date.now()}-${cleanName}`);
     }
   });
-
+  console.log("Almacenamiento configurado en disco local");
 }
 
 const upload = multer({ 
