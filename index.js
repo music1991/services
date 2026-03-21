@@ -47,9 +47,7 @@ app.get('/api/health', (req, res) => {
     storage: process.env.CLOUDINARY_NAME ? 'cloudinary' : 'local'
   });
 });
-// 4. EL CAMBIO CLAVE PARA VERCEL:
-// Solo hacemos el .listen si NO estamos en producción (Vercel)
-// Si estamos en Vercel, él se encarga de manejar la 'app' exportada.
+
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000; 
   httpServer.listen(PORT, () => {
