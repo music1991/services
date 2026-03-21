@@ -22,9 +22,7 @@ async function saveUserSession(userId, durationSeconds) {
   }
 }
 
-// --- NUEVA SECCIÓN DE RECURSOS ---
 
-// 1. Guardar un nuevo recurso
 async function saveResourceToDB({ title, url, type }) {
   try {
     const result = await sql`
