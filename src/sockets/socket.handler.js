@@ -3,7 +3,6 @@ const usersOnline = new Map();
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
-    console.log("🔌 Conectado:", socket.id);
 
      socket.on("user:login", (userData) => {
       if (!userData.id) return;

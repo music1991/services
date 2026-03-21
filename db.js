@@ -1,5 +1,7 @@
 const { neon } = require('@neondatabase/serverless');
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -31,8 +33,7 @@ async function saveResourceToDB({ title, url, type }) {
       RETURNING *;
     `;
     
-    // 🔍 PRUEBA ESTO: Mira si result es un array o un objeto
-    console.log("DB Result Raw:", result[0]); 
+
 
     // Neon suele devolver un array directo [ {id: 1, ...} ]
     // Si ves que en la terminal sale [ { ... } ], usa result[0]

@@ -28,11 +28,10 @@ const uploadResource = async (req, res) => {
       finalUrl = process.env.NODE_ENV === 'production' 
         ? req.file.path 
         : `http://localhost:4000/uploads/${req.file.filename}`;
-      
-    //  console.log("📄 Archivo detectado y guardado en repo:", req.file.filename);
+
     } else {
       finalUrl = url;
-    //  console.log("🔗 Enlace detectado, guardando solo referencia:", url);
+
     }
 
     if (!finalUrl && !title) {

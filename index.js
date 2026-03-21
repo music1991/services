@@ -44,7 +44,7 @@ app.get('/api/online-ids', (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000; 
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Servidor local en http://localhost:${PORT}`);
+    console.log(` Servidor local en http://localhost:${PORT}`);
   });
 }
 

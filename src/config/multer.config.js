@@ -23,7 +23,7 @@ if (isProduction) {
       resource_type: 'auto'
     },
   });
- // console.log("☁️ Multer configurado para Cloudinary (Producción)");
+
 } else {
   const uploadDir = './uploads';
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -35,7 +35,7 @@ if (isProduction) {
       cb(null, `${Date.now()}-${cleanName}`);
     }
   });
- // console.log("💻 Multer configurado para Almacenamiento Local");
+
 }
 
 const upload = multer({ 
