@@ -27,9 +27,9 @@ if (process.env.CLOUDINARY_URL) {
         folder: 'recursos_app',
         // 'auto' permite subir imágenes, PDFs y documentos sin error
         resource_type: 'auto', 
-        public_id: `${Date.now()}-${file.originalname.split('.')[0].replace(/\s+/g, '_')}`,
+       // public_id: `${Date.now()}-${file.originalname.split('.')[0].replace(/\s+/g, '_')}`,
         // Si es PDF, forzamos el formato para evitar conflictos
-        format: isPdf ? 'pdf' : undefined 
+     //   format: isPdf ? 'pdf' : undefined 
       };
     },
   });
