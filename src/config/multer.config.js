@@ -61,7 +61,7 @@ const upload = multer({
   },
   fileFilter: (req, file, cb) => {
     // Filtro de seguridad para tipos de archivos
-    const allowedTypes =;
+    const allowedTypes = ['application/pdf'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
