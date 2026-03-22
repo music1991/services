@@ -21,14 +21,14 @@ const getById = async (req, res) => {
 
 const uploadResource = async (req, res) => {
   try {
+      console.log(" Llega bien por aqui a uploadResource");
     const { title, url, type } = req.body;
     let finalUrl = null;
-
+      console.log(" Llega bien por aqui a uploadResource 2");
     if (req.file) {
       finalUrl = process.env.NODE_ENV === 'production' 
         ? req.file.path 
         : `http://localhost:4000/uploads/${req.file.filename}`;
-
     } else {
       finalUrl = url;
 
