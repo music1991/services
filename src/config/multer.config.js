@@ -4,31 +4,32 @@ const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// 1. Verificación de variables de entorno (Log para depuración en Vercel)
-const hasCloudinaryConfig = process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_KEY && process.env.CLOUDINARY_SECRET;
+// 1. Verificación de variables de entorno
+const hasCloudinaryConfig = process.env.CLOUDINARY_URL;
+
+// 2. Configurar Cloudinary (usa automáticamente CLOUDINARY_URL)
+if (hasCloudinaryConfig) {
+  cloudinary.config({
+    secure: true
+  });
+  console.log("✅ Cloudinary configurado con CLOUDINARY_URL");
+}
+
 
 let storage;
 
 if (hasCloudinaryConfig) {
-  // CONFIGURACIÓN PARA VERCEL (NUBE)
-if (process.env.CLOUDINARY_URL) {
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_NAME || 'dujmkrr81u'
-     });
-    console.log("✅ Multer: Configurado mediante CLOUDINARY_URL");
-}
-
+  // CONFIGURACIÓN PARA VERCEL (CLOUDINARY)
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-      // Determinamos si es un PDF o una imagen para Cloudinary
-     // const isPdf = file.mimetype === 'application/pdf';
       return {
-        upload_preset: 'recursos_preset', // <--- Asegúrate de que este sea el nombre real del preset
-        resource_type: 'auto',
+        folder: 'recursos',      // opcional
+        resource_type: 'auto',   // permite PDF, imágenes, etc.
       };
     },
   });
+
   console.log(" Almacenamiento configurado en Cloudinary");
 
 } else {
