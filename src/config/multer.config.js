@@ -4,10 +4,10 @@ const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-let storage;
+// 1. Verificación de variables de entorno (Log para depuración en Vercel)
+const hasCloudinaryConfig = process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_KEY && process.env.CLOUDINARY_SECRET;
 
-// 1. CAMBIO CLAVE: Detectar Cloudinary por sus variables, no por el entorno
-const hasCloudinaryConfig = process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_KEY;
+let storage;
 
 if (hasCloudinaryConfig) {
   // CONFIGURACIÓN PARA VERCEL (NUBE)
@@ -17,15 +17,22 @@ if (hasCloudinaryConfig) {
     api_secret: process.env.CLOUDINARY_SECRET
   });
 
-  storage = new CloudinaryStorage({ 
+  storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-      folder: 'recursos_app',
-      allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'],
-      resource_type: 'auto' // Esto es vital para que acepte PDFs
+    params: async (req, file) => {
+      // Determinamos si es un PDF o una imagen para Cloudinary
+      const isPdf = file.mimetype === 'application/pdf';
+      return {
+        folder: 'recursos_app',
+        // 'auto' permite subir imágenes, PDFs y documentos sin error
+        resource_type: 'auto', 
+        public_id: `${Date.now()}-${file.originalname.split('.')[0].replace(/\s+/g, '_')}`,
+        // Si es PDF, forzamos el formato para evitar conflictos
+        format: isPdf ? 'pdf' : undefined 
+      };
     },
   });
-  console.log("Almacenamiento configurado en Cloudinary");
+  console.log(" Almacenamiento configurado en Cloudinary");
 
 } else {
   // CONFIGURACIÓN PARA TU PC (LOCAL)
@@ -41,12 +48,26 @@ if (hasCloudinaryConfig) {
       cb(null, `${Date.now()}-${cleanName}`);
     }
   });
-  console.log("Almacenamiento configurado en disco local");
+  console.log(" Almacenamiento configurado en disco local");
 }
 
+// 2. Configuración de Multer con límites de Vercel
 const upload = multer({ 
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+  storage: storage,
+  limits: { 
+    // Vercel Free tiene un límite estricto de 4.5MB por petición completa.
+    // Ponemos 4MB aquí para dejar margen a los demás campos del body.
+    fileSize: 4 * 1024 * 1024 
+  },
+  fileFilter: (req, file, cb) => {
+    // Filtro de seguridad para tipos de archivos
+    const allowedTypes =;
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de archivo no permitido. Solo PDF, imágenes y Word.'));
+    }
+  }
 });
 
 module.exports = upload;
