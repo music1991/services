@@ -32,6 +32,7 @@ if (hasCloudinaryConfig) {
     params: async () => ({
       folder: 'recursos',
       resource_type: 'auto',
+      type: 'upload',
     }),
   });
 } else {
