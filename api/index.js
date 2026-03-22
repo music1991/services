@@ -53,12 +53,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // 5. Manejo del servidor
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 4000; // Cambiado a 4000 para no chocar con el front
-  httpServer.listen(PORT, () => {
-    console.log(`🚀 Servidor local en http://localhost:${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 4000;
 
-// EXPORTAR ES VITAL PARA VERCEL
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});
+
+// Esto lo puedes dejar por si acaso, pero en Render no hace nada
 module.exports = app;
