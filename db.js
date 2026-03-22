@@ -25,24 +25,26 @@ async function saveUserSession(userId, durationSeconds) {
 
 async function saveResourceToDB({ title, url, type }) {
   try {
+    // IMPORTANTE: Asegúrate de que los nombres de las columnas coincidan 
+    // exactamente con los de tu tabla en Neon (Case-sensitive)
     const result = await sql`
       INSERT INTO resources (title, url, type, created_at)
       VALUES (${title}, ${url}, ${type}, NOW())
       RETURNING *;
     `;
-    
 
+    // Neon Serverless devuelve un array. Verificamos que no esté vacío.
+    if (!result || result.length === 0) {
+      throw new Error("La base de datos no devolvió el recurso creado.");
+    }
 
-    // Neon suele devolver un array directo [ {id: 1, ...} ]
-    // Si ves que en la terminal sale [ { ... } ], usa result[0]
-    //throw new error("ERROR", result[0])
     return result[0]; 
   } catch (error) {
-    console.error("❌ Error en SQL:", error);
-    throw error;
+    // Esto imprimirá el error REAL en los logs de Vercel (no solo [object Object])
+    console.error("❌ Error detallado en Neon SQL:", error);
+    throw error; 
   }
 }
-
 // 2. Obtener listado completo
 async function getResourcesFromDB() {
   try {
