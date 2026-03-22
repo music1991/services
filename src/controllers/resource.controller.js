@@ -55,8 +55,16 @@ const uploadResource = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error en uploadResource:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    // ESTO ES LO QUE DEBES CAMBIAR:
+    console.error("ERROR DETALLADO:", error); 
+    
+    // Si el error viene de la base de datos o Cloudinary, 
+    // esto ayudará a que el log de Vercel no sea un simple [object Object]
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || "Error desconocido en el servidor",
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
   }
 };
 
