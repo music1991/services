@@ -34,6 +34,8 @@ const uploadResource = async (req, res) => {
 
     }
 
+    console.log("url final", finalUrl)
+
     if (!finalUrl && !title) {
       return res.status(400).json({ 
         success: false, 
