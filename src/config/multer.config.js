@@ -31,8 +31,10 @@ if (hasCloudinaryConfig) {
     cloudinary,
     params: async () => ({
       folder: 'recursos',
-      resource_type: 'auto',
-      type: 'upload',
+    resource_type: 'raw',
+    type: 'upload',
+    format: 'pdf',
+    access_mode: 'public',
     }),
   });
 } else {
