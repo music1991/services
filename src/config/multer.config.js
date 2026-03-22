@@ -11,11 +11,12 @@ let storage;
 
 if (hasCloudinaryConfig) {
   // CONFIGURACIÓN PARA VERCEL (NUBE)
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_KEY,
-    api_secret: process.env.CLOUDINARY_SECRET
-  });
+if (process.env.CLOUDINARY_URL) {
+    cloudinary.config({
+        cloudinary_url: process.env.CLOUDINARY_URL
+    });
+    console.log("✅ Multer: Configurado mediante CLOUDINARY_URL");
+}
 
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
