@@ -13,8 +13,8 @@ if (hasCloudinaryConfig) {
   // CONFIGURACIÓN PARA VERCEL (NUBE)
 if (process.env.CLOUDINARY_URL) {
     cloudinary.config({
-        cloudinary_url: process.env.CLOUDINARY_URL
-    });
+      cloud_name: process.env.CLOUDINARY_NAME || 'dujmkrr81u'
+     });
     console.log("✅ Multer: Configurado mediante CLOUDINARY_URL");
 }
 
@@ -22,12 +22,10 @@ if (process.env.CLOUDINARY_URL) {
     cloudinary: cloudinary,
     params: async (req, file) => {
       // Determinamos si es un PDF o una imagen para Cloudinary
-      const isPdf = file.mimetype === 'application/pdf';
+     // const isPdf = file.mimetype === 'application/pdf';
       return {
-        folder: 'recursos_app',
-        // 'auto' permite subir imágenes, PDFs y documentos sin error
-        resource_type: 'auto', 
-        upload_preset: 'ml_default', 
+        upload_preset: 'recursos_preset', // <--- Asegúrate de que este sea el nombre real del preset
+        resource_type: 'auto',
       };
     },
   });
