@@ -5,33 +5,35 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 // 1. Verificación de variables de entorno
-const hasCloudinaryConfig = process.env.CLOUDINARY_URL;
+const hasCloudinaryConfig =
+  !!process.env.CLOUDINARY_NAME &&
+  !!process.env.CLOUDINARY_KEY &&
+  !!process.env.CLOUDINARY_SECRET;
 
-// 2. Configurar Cloudinary (usa automáticamente CLOUDINARY_URL)
 if (hasCloudinaryConfig) {
   cloudinary.config({
-    secure: true
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET,
+    secure: true,
   });
-  console.log("✅ Cloudinary configurado con CLOUDINARY_URL");
-}
 
+  console.log('Cloudinary configurado');
+  console.log('cloud_name:', process.env.CLOUDINARY_NAME);
+  console.log('api_key:', process.env.CLOUDINARY_KEY);
+  console.log('api_secret_exists:', !!process.env.CLOUDINARY_SECRET);
+}
 
 let storage;
 
 if (hasCloudinaryConfig) {
-  // CONFIGURACIÓN PARA VERCEL (CLOUDINARY)
   storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: async (req, file) => {
-      return {
-        folder: 'recursos',      // opcional
-        resource_type: 'auto',   // permite PDF, imágenes, etc.
-      };
-    },
+    cloudinary,
+    params: async () => ({
+      folder: 'recursos',
+      resource_type: 'auto',
+    }),
   });
-
-  console.log(" Almacenamiento configurado en Cloudinary");
-
 } else {
   // CONFIGURACIÓN PARA TU PC (LOCAL)
   const uploadDir = path.join(process.cwd(), 'uploads');
