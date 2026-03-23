@@ -66,6 +66,5 @@ const uploadResource = async (req, res) => {
 module.exports = { 
   uploadResource, 
   getResources,
-  getById,
-  handleGoogleFormsWebhook
+  getById
 };
