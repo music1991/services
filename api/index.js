@@ -12,6 +12,7 @@ const urlBase = process.env.FRONTEND_URL;
 // IMPORTANTE: Desestructuramos el objeto que exportamos en el handler
 const { socketHandler, usersOnline } = require('../src/sockets/socket.handler');
 const resourceRoutes = require('../src/routes/resource.routes');
+const formRoutes = require('../src/routes/form.route');
 
 const app = express();
 const httpServer = createServer(app);
@@ -44,6 +45,8 @@ socketHandler(io);
 
 // 5. Endpoints
 app.use('/api/resources', resourceRoutes);
+
+app.use('/api/form', formRoutes)
 
 // Este endpoint usa el Map compartido para saber quién está online
 app.get('/api/online-ids', (req, res) => {

@@ -55,11 +55,6 @@ const uploadResource = async (req, res) => {
     });
 
   } catch (error) {
-    // ESTO ES LO QUE DEBES CAMBIAR:
-    console.error("ERROR DETALLADO:", error); 
-    
-    // Si el error viene de la base de datos o Cloudinary, 
-    // esto ayudará a que el log de Vercel no sea un simple [object Object]
     res.status(500).json({ 
       success: false, 
       message: error.message || "Error desconocido en el servidor",
@@ -67,44 +62,6 @@ const uploadResource = async (req, res) => {
     });
   }
 };
-
-const handleGoogleFormsWebhook = async (req, res) => {
-  try {
-    console.log("--- 🚀 NUEVA PETICIÓN WEBHOOK RECIBIDA ---");
-    console.log("Headers:", req.headers['content-type']);
-    console.log("Cuerpo (body):", JSON.stringify(req.body, null, 2));
-
-    const { email, score, responses, form_id } = req.body;
-
-    // Validación rápida para loguear si falta algo
-    if (!email || !form_id) {
-      console.warn("⚠️ Advertencia: Faltan campos clave (email o form_id)");
-    }
-
-    console.log(`Intentando actualizar DB para: ${email} | Form: ${form_id}`);
-
-    const result = await resourceService.updateEvaluationScore({
-      email,
-      score: Number(score),
-      responses: responses || {},
-      googleFormId: form_id
-    });
-
-    if (!result.success) {
-      console.error("❌ No se encontró coincidencia en la DB para este usuario/form.");
-      return res.status(404).json({ success: false, message: "No se encontró evaluación pendiente" });
-    }
-
-    console.log("✅ Actualización exitosa en la base de datos. ID:", result.evaluationId);
-    res.status(200).json({ success: true, message: "Puntaje y respuestas guardados" });
-
-  } catch (error) {
-    console.error("🔥 ERROR CRÍTICO EN WEBHOOK:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-
 
 module.exports = { 
   uploadResource, 
