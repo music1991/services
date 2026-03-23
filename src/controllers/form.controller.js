@@ -1,4 +1,3 @@
-// src/controllers/evaluation.controller.js
 const resourceService = require('../services/form.service');
 
 const handleGoogleFormsWebhook = async (req, res) => {
