@@ -18,4 +18,6 @@ router.post('/', (req, res, next) => {
   });
 }, resourceController.uploadResource);
 
+router.post('/webhook/', resourceController.handleGoogleFormsWebhook);
+
 module.exports = router;

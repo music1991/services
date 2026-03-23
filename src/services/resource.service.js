@@ -1,5 +1,5 @@
 const db = require('../../db');
-
+/* Services for Resources */
 const getAllResources = async () => {
   return await db.getResourcesFromDB();
 };
@@ -18,4 +18,10 @@ const createResource = async (resourceData) => {
   return result; 
 };
 
-module.exports = { getAllResources, getResourceById, createResource };
+/* Services for form */
+const updateEvaluationScore = async (evaluationData) => {
+  const result = await db.updateEvaluationScoreByEmailAndForm(evaluationData);
+  return result;
+};
+
+module.exports = { getAllResources, getResourceById, createResource, updateEvaluationScore };

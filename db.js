@@ -75,9 +75,40 @@ async function getResourceByIdFromDB(id) {
   }
 }
 
+async function updateEvaluationScoreByEmailAndForm({ email, score, responses, googleFormId }) {
+  try {
+    console.log(`--- Ejecutando SQL para ${email} ---`);
+    
+    const result = await sql`
+      UPDATE evaluations
+      SET
+        score = ${score},
+        responses = ${JSON.stringify(responses)},
+        status = 'completed',
+        completed_date = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = (SELECT id FROM users WHERE email = ${email} LIMIT 1)
+        AND template_id = (SELECT id FROM evaluation_templates WHERE google_form_id = ${googleFormId} LIMIT 1)
+        AND status != 'completed'
+      RETURNING id;
+    `;
+
+    console.log("Resultado del Query (filas afectadas):", result.length);
+    
+    return {
+      success: result.length > 0,
+      evaluationId: result.length > 0 ? result[0].id : null
+    };
+  } catch (error) {
+    console.error("❌ Error de SQL en updateEvaluationScoreByEmailAndForm:", error);
+    throw error;
+  }
+}
+
 module.exports = { 
   saveUserSession, 
   saveResourceToDB, 
   getResourcesFromDB, 
-  getResourceByIdFromDB 
+  getResourceByIdFromDB,
+  updateEvaluationScoreByEmailAndForm
 };
