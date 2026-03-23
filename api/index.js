@@ -1,3 +1,4 @@
+require('dotenv').config(); 
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -5,17 +6,19 @@ const cors = require('cors');
 const path = require('path');
 
 // 1. Configuración de URLs
-const urlBase = process.env.FRONTEND_URL || "*"; 
+// Asegúrate de que FRONTEND_URL en tu .env sea "http://localhost:3000"
+const urlBase = process.env.FRONTEND_URL; 
 
-// Ajustamos los require para que suban un nivel desde la carpeta /api
+// IMPORTANTE: Desestructuramos el objeto que exportamos en el handler
+const { socketHandler, usersOnline } = require('../src/sockets/socket.handler');
 const resourceRoutes = require('../src/routes/resource.routes');
-const socketHandler = require('../src/sockets/socket.handler');
 
 const app = express();
 const httpServer = createServer(app);
 
-// 2. Configuración de Sockets
+// 2. Configuración de Sockets (Ajustado para CORS y estabilidad)
 const io = new Server(httpServer, {
+  path: "/socket.io/",
   cors: { 
     origin: urlBase, 
     methods: ["GET", "POST"],
@@ -24,18 +27,25 @@ const io = new Server(httpServer, {
   transports: ['polling', 'websocket'] 
 });
 
-app.use(cors({ origin: urlBase }));
+// Middleware de CORS para la API normal (HTTP)
+app.use(cors({ 
+  origin: urlBase,
+  credentials: true 
+}));
+
 app.use(express.json());
 
-// 3. Rutas estáticas (Corregido para Vercel)
-// Usamos process.cwd() para asegurar que encuentre la carpeta en la raíz
+// 3. Rutas estáticas (Tal como lo tenías)
 app.use('/uploads', express.static(path.join(process.cwd(), 'src/uploads')));
 
-const usersOnline = socketHandler(io);
+// 4. Inicialización de Sockets
+// Ejecutamos la función pasándole la instancia de 'io'
+socketHandler(io);
 
-// 4. Endpoints
+// 5. Endpoints
 app.use('/api/resources', resourceRoutes);
 
+// Este endpoint usa el Map compartido para saber quién está online
 app.get('/api/online-ids', (req, res) => {
   res.json(Array.from(usersOnline.values()));
 });
@@ -47,17 +57,16 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    // IMPORTANTE: Verifica que este nombre coincida con tu panel de Vercel
     storage: process.env.CLOUDINARY_NAME ? 'cloudinary' : 'local'
   });
 });
 
-// 5. Manejo del servidor
+// 6. Manejo del servidor
 const PORT = process.env.PORT || 4000;
 
 httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+  console.log(`📡 Aceptando conexiones de: ${urlBase}`);
 });
 
-// Esto lo puedes dejar por si acaso, pero en Render no hace nada
 module.exports = app;
