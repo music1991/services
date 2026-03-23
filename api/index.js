@@ -12,7 +12,7 @@ const urlBase = process.env.FRONTEND_URL;
 // IMPORTANTE: Desestructuramos el objeto que exportamos en el handler
 const { socketHandler, usersOnline } = require('../src/sockets/socket.handler');
 const resourceRoutes = require('../src/routes/resource.routes');
-const formRoutes = require('../src/routes/form.route');
+const formRoutes = require('../src/routes/form.routes');
 
 const app = express();
 const httpServer = createServer(app);
