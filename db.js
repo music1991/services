@@ -139,9 +139,53 @@ async function patchEvaluationStatusById(evaluationId, newStatus) {
 
 async function updateEvaluationScoreByEmail({ email, score, responses }) {
   try {
-    console.log(`--- Ejecutando SQL para ${email} ---`);
+    console.log(`--- Buscando usuario para email: ${email} ---`);
 
-    const result = await sql`
+    const userResult = await sql`
+      SELECT id
+      FROM users
+      WHERE email = ${email}
+      LIMIT 1;
+    `;
+
+    if (!userResult.length) {
+      console.warn(`⚠️ No se encontró usuario con email: ${email}`);
+      return {
+        success: false,
+        evaluationId: null,
+        message: "Usuario no encontrado",
+      };
+    }
+
+    const userId = userResult[0].id;
+
+    console.log(`✅ Usuario encontrado. user_id: ${userId}`);
+    console.log(`--- Buscando evaluación en status 1 para user_id: ${userId} ---`);
+
+    const evaluationResult = await sql`
+      SELECT id
+      FROM evaluations
+      WHERE user_id = ${userId}
+        AND status = 1
+      ORDER BY created_at DESC
+      LIMIT 1;
+    `;
+
+    if (!evaluationResult.length) {
+      console.warn(`⚠️ No se encontró evaluación en status 1 para user_id: ${userId}`);
+      return {
+        success: false,
+        evaluationId: null,
+        message: "No se encontró evaluación pendiente/en progreso",
+      };
+    }
+
+    const evaluationId = evaluationResult[0].id;
+
+    console.log(`✅ Evaluación encontrada. evaluation_id: ${evaluationId}`);
+    console.log(`--- Actualizando evaluación ${evaluationId} ---`);
+
+    const updateResult = await sql`
       UPDATE evaluations
       SET
         score = ${score},
@@ -149,23 +193,15 @@ async function updateEvaluationScoreByEmail({ email, score, responses }) {
         status = 2,
         completed_date = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = (
-        SELECT e.id
-        FROM evaluations e
-        INNER JOIN users u ON u.id = e.user_id
-        WHERE u.email = ${email}
-          AND e.status = 1
-        ORDER BY e.created_at DESC
-        LIMIT 1
-      )
+      WHERE id = ${evaluationId}
       RETURNING id;
     `;
 
-    console.log("Resultado del Query (filas afectadas):", result.length);
+    console.log("Resultado del UPDATE (filas afectadas):", updateResult.length);
 
     return {
-      success: result.length > 0,
-      evaluationId: result.length > 0 ? result[0].id : null,
+      success: updateResult.length > 0,
+      evaluationId: updateResult.length > 0 ? updateResult[0].id : null,
     };
   } catch (error) {
     console.error("❌ Error de SQL en updateEvaluationScoreByEmail:", error);
