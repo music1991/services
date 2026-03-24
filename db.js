@@ -75,32 +75,100 @@ async function getResourceByIdFromDB(id) {
   }
 }
 
-async function updateEvaluationScoreByEmailAndForm({ email, score, responses, googleFormId }) {
+async function patchEvaluationStatusById(evaluationId, newStatus) {
+  try {
+    console.log(`--- 🔄 Validando flujo: ID ${evaluationId} -> Intento de Status: ${newStatus} ---`);
+
+    // 1. Obtener el estado actual
+    const currentRecord = await sql`
+      SELECT status FROM evaluations WHERE id = ${evaluationId}
+    `;
+
+    if (currentRecord.length === 0) {
+      return { success: false, message: "Evaluación no encontrada 1" };
+    }
+
+    const currentStatus = Number(currentRecord[0].status);
+    const targetStatus = Number(newStatus);
+
+    // 2. Controlar si ya tiene el estado o uno superior (Evita retrocesos)
+    if (currentStatus >= targetStatus) {
+      return {
+        success: true, 
+        message: `Sin cambios: El estado actual (${currentStatus}) es igual o superior al solicitado (${targetStatus}).`,
+        alreadyInStatus: true,
+        currentStatus
+      };
+    }
+
+    // 3. Controlar que el avance sea escalonado (Solo permite N + 1)
+    // Si quieres permitir saltos (ej: de 0 a 2), elimina esta validación.
+    if (targetStatus !== currentStatus + 1) {
+      return {
+        success: false,
+        message: `Movimiento inválido: No puedes pasar de ${currentStatus} a ${targetStatus}. Debe ser secuencial.`,
+        currentStatus
+      };
+    }
+
+    // 4. Si pasó las validaciones, ejecutamos el UPDATE
+    const result = await sql`
+      UPDATE evaluations
+      SET 
+        status = ${targetStatus},
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${evaluationId}
+      RETURNING id, status;
+    `;
+
+    return {
+      success: true,
+      message: `Estado actualizado de ${currentStatus} a ${targetStatus}`,
+      evaluationId: result[0].id,
+      newStatus: result[0].status
+    };
+
+  } catch (error) {
+    console.error("❌ Error en patchEvaluationStatusById:", error);
+    throw error;
+  }
+}
+
+
+
+
+async function updateEvaluationScoreByEmailAndForm({ email, score, responses }) {
   try {
     console.log(`--- Ejecutando SQL para ${email} ---`);
-    
+
     const result = await sql`
       UPDATE evaluations
       SET
         score = ${score},
         responses = ${JSON.stringify(responses)},
-        status = 'completed',
+        status = 2,
         completed_date = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
-      WHERE user_id = (SELECT id FROM users WHERE email = ${email} LIMIT 1)
-        AND template_id = (SELECT id FROM evaluation_templates WHERE google_form_id = ${googleFormId} LIMIT 1)
-        AND status != 'completed'
+      WHERE id = (
+        SELECT e.id
+        FROM evaluations e
+        INNER JOIN users u ON u.id = e.user_id
+        WHERE u.email = ${email}
+          AND e.status = 1
+        ORDER BY e.created_at DESC
+        LIMIT 1
+      )
       RETURNING id;
     `;
 
     console.log("Resultado del Query (filas afectadas):", result.length);
-    
+
     return {
       success: result.length > 0,
-      evaluationId: result.length > 0 ? result[0].id : null
+      evaluationId: result.length > 0 ? result[0].id : null,
     };
   } catch (error) {
-    console.error("❌ Error de SQL en updateEvaluationScoreByEmailAndForm:", error);
+    console.error("❌ Error de SQL en updateEvaluationScoreByEmail:", error);
     throw error;
   }
 }
@@ -110,5 +178,6 @@ module.exports = {
   saveResourceToDB, 
   getResourcesFromDB, 
   getResourceByIdFromDB,
-  updateEvaluationScoreByEmailAndForm
+  updateEvaluationScoreByEmailAndForm,
+  patchEvaluationStatusById
 };

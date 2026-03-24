@@ -13,6 +13,20 @@ const updateEvaluationScore = async (evaluationData) => {
   }
 };
 
+const updateEvaluationStatus = async (evaluationId, status) => {
+  try {
+    console.log("--- 🛠️ SERVICE: Procesando actualización ---");
+    
+    const result = await db.patchEvaluationStatusById(evaluationId, status);
+    
+    return result;
+  } catch (error) {
+    console.error("❌ Error en Resource Service:", error.message);
+    throw error;
+  }
+};
+
 module.exports = {
-  updateEvaluationScore
+  updateEvaluationScore,
+  updateEvaluationStatus
 };

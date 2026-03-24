@@ -4,7 +4,9 @@ const formController = require('../controllers/form.controller');
 
 router.post('/', formController.handleGoogleFormsWebhook);
 
-router.get('/', (req, res) => {
+router.patch('/', formController.updateEvaluationStatus)
+
+/* router.get('/', (req, res) => {
   console.log("--- 🔍 TEST GET RECIBIDO ---");
   console.log("Query params:", req.query); // Lo que va después del ? en la URL
   console.log("Headers:", req.headers['user-agent']); // Quién hace la petición
@@ -19,5 +21,5 @@ router.get('/', (req, res) => {
     ayuda: "Si ves esto, la URL correcta para el Apps Script es https://services-etrl.onrender.com"
   });
 });
-
+ */
 module.exports = router; 
