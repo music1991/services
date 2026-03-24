@@ -137,7 +137,7 @@ async function patchEvaluationStatusById(evaluationId, newStatus) {
 
 
 
-async function updateEvaluationScoreByEmailAndForm({ email, score, responses }) {
+async function updateEvaluationScoreByEmail({ email, score, responses }) {
   try {
     console.log(`--- Ejecutando SQL para ${email} ---`);
 
@@ -178,6 +178,6 @@ module.exports = {
   saveResourceToDB, 
   getResourcesFromDB, 
   getResourceByIdFromDB,
-  updateEvaluationScoreByEmailAndForm,
+  updateEvaluationScoreByEmail,
   patchEvaluationStatusById
 };

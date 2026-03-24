@@ -20,7 +20,7 @@ const createResource = async (resourceData) => {
 
 /* Services for form */
 const updateEvaluationScore = async (evaluationData) => {
-  const result = await db.updateEvaluationScoreByEmailAndForm(evaluationData);
+  const result = await db.updateEvaluationScoreByEmail(evaluationData);
   return result;
 };
 

@@ -17,7 +17,7 @@ const handleGoogleFormsWebhook = async (req, res) => {
 
     console.log(`Intentando actualizar evaluación para email: ${email}`);
 
-    const result = await formService.updateEvaluationScoreByEmail({
+    const result = await formService.updateEvaluationScore({
       email,
       score: Number(score) || 0,
       responses: responses || {},

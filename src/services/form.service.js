@@ -4,7 +4,7 @@ const updateEvaluationScore = async (evaluationData) => {
   try {
     console.log("--- 🛠️ SERVICE: Procesando actualización ---");
     
-    const result = await db.updateEvaluationScoreByEmailAndForm(evaluationData);
+    const result = await db.updateEvaluationScoreByEmail(evaluationData);
     
     return result;
   } catch (error) {
