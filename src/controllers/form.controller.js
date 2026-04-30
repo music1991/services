@@ -1,48 +1,41 @@
 const formService = require('../services/form.service');
 
+const VALID_STATUSES = ['pending', 'in_progress', 'completed'];
+
 const handleGoogleFormsWebhook = async (req, res) => {
   try {
-    console.log("--- 🚀 NUEVA PETICIÓN WEBHOOK RECIBIDA ---");
-    console.log("Cuerpo (body):", JSON.stringify(req.body, null, 2));
-
     const { email, score, responses } = req.body;
 
-    if (!email) {
-      console.warn("⚠️ Advertencia: Falta email");
+    if (!email || score == null || responses == null) {
       return res.status(400).json({
         success: false,
-        message: "Falta el campo obligatorio: email",
+        message: 'Faltan campos obligatorios: email, score, responses',
       });
     }
-
-    console.log(`Intentando actualizar evaluación para email: ${email}`);
 
     const result = await formService.updateEvaluationScore({
       email,
-      score: Number(score) || 0,
-      responses: responses || {},
+      score: Number(score),
+      responses,
     });
 
     if (!result.success) {
-      console.error("❌ No se encontró una evaluación activa para ese usuario.");
       return res.status(404).json({
         success: false,
-        message: "No se encontró una evaluación en estado 1 para este usuario",
+        message: result.message || 'No se encontró una evaluación en estado in_progress para este usuario',
       });
     }
 
-    console.log("✅ Actualización exitosa en la base de datos. ID:", result.evaluationId);
-
     return res.status(200).json({
       success: true,
-      message: "Puntaje y respuestas guardados correctamente",
+      message: 'Puntaje y respuestas guardados correctamente',
       id: result.evaluationId,
     });
   } catch (error) {
-    console.error("🔥 ERROR CRÍTICO EN WEBHOOK:", error);
+    console.error('Error en handleGoogleFormsWebhook:', error);
     return res.status(500).json({
       success: false,
-      message: error.message || "Error interno del servidor",
+      message: error.message || 'Error interno del servidor',
     });
   }
 };
@@ -51,23 +44,38 @@ const updateEvaluationStatus = async (req, res) => {
   try {
     const { evaluationId, status } = req.body;
 
-    console.log("DATOS", evaluationId, status)
+    if (!evaluationId || !status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Faltan campos obligatorios: evaluationId, status',
+      });
+    }
 
-    // CONTROLAR EL ESTADO
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `El estado '${status}' no es válido. Valores permitidos: ${VALID_STATUSES.join(', ')}`,
+      });
+    }
+
     const result = await formService.updateEvaluationStatus(evaluationId, status);
 
     if (!result.success) {
-      return res.status(404).json({ success: false, message: "Evaluación no encontrada 2" });
+      const isNotFound = result.message?.toLowerCase().includes('no encontrada');
+      return res.status(isNotFound ? 404 : 400).json({
+        success: false,
+        message: result.message,
+      });
     }
 
-    return res.status(200).json({ success: true, message: "Campo 'status' actualizado" });
+    return res.status(200).json({ success: true, message: 'Estado actualizado correctamente' });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    console.error('Error en updateEvaluationStatus:', error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
 module.exports = {
   handleGoogleFormsWebhook,
-  updateEvaluationStatus
+  updateEvaluationStatus,
 };

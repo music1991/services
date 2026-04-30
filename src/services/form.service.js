@@ -2,31 +2,23 @@ const db = require('../../db');
 
 const updateEvaluationScore = async (evaluationData) => {
   try {
-    console.log("--- 🛠️ SERVICE: Procesando actualización ---");
-    
-    const result = await db.updateEvaluationScoreByEmail(evaluationData);
-    
-    return result;
+    return await db.updateEvaluationScoreByEmail(evaluationData);
   } catch (error) {
-    console.error("❌ Error en Resource Service:", error.message);
+    console.error('Error en form.service (updateEvaluationScore):', error.message);
     throw error;
   }
 };
 
 const updateEvaluationStatus = async (evaluationId, status) => {
   try {
-    console.log("--- 🛠️ SERVICE: Procesando actualización ---");
-    
-    const result = await db.patchEvaluationStatusById(evaluationId, status);
-    
-    return result;
+    return await db.patchEvaluationStatusById(evaluationId, status);
   } catch (error) {
-    console.error("❌ Error en Resource Service:", error.message);
+    console.error('Error en form.service (updateEvaluationStatus):', error.message);
     throw error;
   }
 };
 
 module.exports = {
   updateEvaluationScore,
-  updateEvaluationStatus
+  updateEvaluationStatus,
 };
