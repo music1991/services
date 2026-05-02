@@ -10,6 +10,7 @@ const urlBase = process.env.FRONTEND_URL;
 const { socketHandler, usersOnline } = require('../src/sockets/socket.handler');
 const resourceRoutes = require('../src/routes/resource.routes');
 const formRoutes = require('../src/routes/form.routes');
+const certificationRoutes = require('../src/routes/certification.routes');
 
 const app = express();
 const httpServer = createServer(app);
@@ -37,6 +38,7 @@ socketHandler(io);
 
 app.use('/api/resources', resourceRoutes);
 app.use('/api/form', formRoutes);
+app.use('/api/certifications', certificationRoutes);
 
 app.get('/api/online-ids', (req, res) => {
   res.json(Array.from(usersOnline.values()));
