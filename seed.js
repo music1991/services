@@ -193,18 +193,18 @@ async function seed() {
   // ── 7. TASKS ASIGNADAS ────────────────────────────────────────────────────
   console.log('→ tasks');
   const tasks = [
-    { id: ID.tsk1, template_id: ID.ttDoc,     user_id: ID.ana,   title: 'Documentar API — Módulo Usuarios',     description: 'Documentar todos los endpoints del módulo de usuarios usando Swagger.',          status: 'completed',  progress: 100, due_date: '2026-04-15', details: JSON.stringify({ instructions: 'Usar el estándar OpenAPI 3.0. Ver ticket #101.', type: 'report', estimatedHours: 4 }) },
-    { id: ID.tsk2, template_id: ID.ttReview,  user_id: ID.ana,   title: 'Code Review — PR #42 Training Module', description: 'Revisar el PR del módulo de formación antes del merge a main.',                  status: 'in-progress', progress: 60,  due_date: '2026-05-10', details: JSON.stringify({ instructions: 'Foco en seguridad y validaciones. Ticket #142.', type: 'project', estimatedHours: 2 }) },
-    { id: ID.tsk3, template_id: ID.ttFeature, user_id: ID.juan,  title: 'Implementar endpoint ROI',             description: 'Desarrollar el endpoint /api/training/roi con los cálculos de retorno.',        status: 'in-progress', progress: 40,  due_date: '2026-05-15', details: JSON.stringify({ instructions: 'Seguir la especificación del documento de diseño ROI v2.', type: 'project', estimatedHours: 6 }) },
-    { id: ID.tsk4, template_id: ID.ttRefact,  user_id: ID.juan,  title: 'Refactoring módulo de autenticación', description: 'Aplicar Clean Architecture al módulo de auth. Tests deben pasar.',               status: 'pending',     progress: 0,   due_date: '2026-05-20', details: JSON.stringify({ instructions: 'Mantener compatibilidad con tokens existentes.', type: 'project', estimatedHours: 8 }) },
-    { id: ID.tsk5, template_id: ID.ttDoc,     user_id: ID.maria, title: 'Documentar plan de pruebas — v2.0',   description: 'Documentar los casos de prueba del módulo de formación en Confluence.',           status: 'pending',     progress: 0,   due_date: '2026-05-12', details: JSON.stringify({ instructions: 'Incluir casos positivos, negativos y edge cases.', type: 'report', estimatedHours: 4 }) },
-    { id: ID.tsk6, template_id: ID.ttFeature, user_id: ID.pedro, title: 'Pipeline CI/CD para módulo training', description: 'Configurar GitHub Actions para deploy automático del módulo de formación.',      status: 'pending',     progress: 0,   due_date: '2026-05-18', details: JSON.stringify({ instructions: 'Incluir steps: lint, test, build, deploy a staging.', type: 'project', estimatedHours: 6 }) },
+    { id: ID.tsk1, template_id: ID.ttDoc,     user_id: ID.ana,   line_id: null,          title: 'Documentar API — Módulo Usuarios',     description: 'Documentar todos los endpoints del módulo de usuarios usando Swagger.',          status: 'completed',  progress: 100, due_date: '2026-04-15', details: JSON.stringify({ instructions: 'Usar el estándar OpenAPI 3.0. Ver ticket #101.', type: 'report', estimatedHours: 4 }) },
+    { id: ID.tsk2, template_id: ID.ttReview,  user_id: ID.ana,   line_id: ID.tlFrontend, title: 'Code Review — PR #42 Training Module', description: 'Revisar el PR del módulo de formación antes del merge a main.',                  status: 'in-progress', progress: 60,  due_date: '2026-05-10', details: JSON.stringify({ instructions: 'Foco en seguridad y validaciones. Ticket #142.', type: 'project', estimatedHours: 2 }) },
+    { id: ID.tsk3, template_id: ID.ttFeature, user_id: ID.juan,  line_id: ID.tlDevOps,   title: 'Implementar endpoint ROI',             description: 'Desarrollar el endpoint /api/training/roi con los cálculos de retorno.',        status: 'in-progress', progress: 40,  due_date: '2026-05-15', details: JSON.stringify({ instructions: 'Seguir la especificación del documento de diseño ROI v2.', type: 'project', estimatedHours: 6 }) },
+    { id: ID.tsk4, template_id: ID.ttRefact,  user_id: ID.juan,  line_id: null,          title: 'Refactoring módulo de autenticación', description: 'Aplicar Clean Architecture al módulo de auth. Tests deben pasar.',               status: 'pending',     progress: 0,   due_date: '2026-05-20', details: JSON.stringify({ instructions: 'Mantener compatibilidad con tokens existentes.', type: 'project', estimatedHours: 8 }) },
+    { id: ID.tsk5, template_id: ID.ttDoc,     user_id: ID.maria, line_id: ID.tlQA,       title: 'Documentar plan de pruebas — v2.0',   description: 'Documentar los casos de prueba del módulo de formación en Confluence.',           status: 'pending',     progress: 0,   due_date: '2026-05-12', details: JSON.stringify({ instructions: 'Incluir casos positivos, negativos y edge cases.', type: 'report', estimatedHours: 4 }) },
+    { id: ID.tsk6, template_id: ID.ttFeature, user_id: ID.pedro, line_id: ID.tlDevOps,   title: 'Pipeline CI/CD para módulo training', description: 'Configurar GitHub Actions para deploy automático del módulo de formación.',      status: 'pending',     progress: 0,   due_date: '2026-05-18', details: JSON.stringify({ instructions: 'Incluir steps: lint, test, build, deploy a staging.', type: 'project', estimatedHours: 6 }) },
   ];
   for (const t of tasks) {
     await sql`
-      INSERT INTO tasks (id, template_id, user_id, assigned_by, title, description, status, progress, assigned_date, due_date, details)
+      INSERT INTO tasks (id, template_id, user_id, assigned_by, title, description, status, progress, assigned_date, due_date, training_line_id, details)
       VALUES (${t.id}, ${t.template_id}, ${t.user_id}, ${ID.admin}, ${t.title}, ${t.description},
-              ${t.status}, ${t.progress}, NOW() - INTERVAL '10 days', ${t.due_date}, ${t.details}::jsonb)
+              ${t.status}, ${t.progress}, NOW() - INTERVAL '10 days', ${t.due_date}, ${t.line_id ?? null}, ${t.details}::jsonb)
       ON CONFLICT (id) DO NOTHING
     `;
   }
@@ -228,18 +228,18 @@ async function seed() {
   // ── 9. EVALUATIONS ASIGNADAS ──────────────────────────────────────────────
   console.log('→ evaluations');
   const evaluations = [
-    { id: ID.ev1, template_id: ID.etGit,     user_id: ID.ana,   status: 'completed',  score: 88,  max_score: 100, due_date: '2026-04-30', completed_date: '2026-04-22' },
-    { id: ID.ev2, template_id: ID.etReact,   user_id: ID.ana,   status: 'pending',    score: null, max_score: 100, due_date: '2026-05-20', completed_date: null },
-    { id: ID.ev3, template_id: ID.etGit,     user_id: ID.juan,  status: 'completed',  score: 74,  max_score: 100, due_date: '2026-04-30', completed_date: '2026-04-25' },
-    { id: ID.ev4, template_id: ID.etTesting, user_id: ID.maria, status: 'in_progress', score: null, max_score: 100, due_date: '2026-05-15', completed_date: null },
-    { id: ID.ev5, template_id: ID.etGit,     user_id: ID.lucia, status: 'pending',    score: null, max_score: 100, due_date: '2026-05-10', completed_date: null },
+    { id: ID.ev1, template_id: ID.etGit,     user_id: ID.ana,   line_id: ID.tlFrontend, status: 'completed',   score: 88,   max_score: 100, due_date: '2026-04-30', completed_date: '2026-04-22' },
+    { id: ID.ev2, template_id: ID.etReact,   user_id: ID.ana,   line_id: null,          status: 'pending',     score: null, max_score: 100, due_date: '2026-05-20', completed_date: null },
+    { id: ID.ev3, template_id: ID.etGit,     user_id: ID.juan,  line_id: null,          status: 'completed',   score: 74,   max_score: 100, due_date: '2026-04-30', completed_date: '2026-04-25' },
+    { id: ID.ev4, template_id: ID.etTesting, user_id: ID.maria, line_id: ID.tlQA,       status: 'in_progress', score: null, max_score: 100, due_date: '2026-05-15', completed_date: null },
+    { id: ID.ev5, template_id: ID.etGit,     user_id: ID.lucia, line_id: ID.tlFrontend, status: 'pending',     score: null, max_score: 100, due_date: '2026-05-10', completed_date: null },
   ];
   for (const ev of evaluations) {
     await sql`
-      INSERT INTO evaluations (id, template_id, user_id, assigned_by, status, score, max_score, assigned_date, due_date, completed_date, responses)
+      INSERT INTO evaluations (id, template_id, user_id, assigned_by, status, score, max_score, assigned_date, due_date, completed_date, training_line_id, responses)
       VALUES (${ev.id}, ${ev.template_id}, ${ev.user_id}, ${ID.admin}, ${ev.status},
               ${ev.score}, ${ev.max_score}, NOW() - INTERVAL '15 days', ${ev.due_date},
-              ${ev.completed_date ?? null}, ${JSON.stringify({})}::jsonb)
+              ${ev.completed_date ?? null}, ${ev.line_id ?? null}, ${JSON.stringify({})}::jsonb)
       ON CONFLICT (id) DO NOTHING
     `;
   }
@@ -345,15 +345,32 @@ async function seed() {
   `;
 
   // ── 16. PRODUCTIVITY METRICS ──────────────────────────────────────────────
+  // Pre-training (baseline, 25 días atrás) + post-training (actual, hoy)
+  // El ROI snapshot captura el estado pre-training; "actual" se calcula dinámicamente.
   console.log('→ productivity_metrics');
-  const metrics = [
+  const metricsPreTraining = [
+    { user_id: ID.ana,   t_completed: 1, t_assigned: 3, score: 55 },
+    { user_id: ID.juan,  t_completed: 1, t_assigned: 3, score: 50 },
+    { user_id: ID.maria, t_completed: 0, t_assigned: 2, score: 38 },
+    { user_id: ID.pedro, t_completed: 0, t_assigned: 2, score: 32 },
+    { user_id: ID.lucia, t_completed: 0, t_assigned: 1, score: 20 },
+  ];
+  for (const m of metricsPreTraining) {
+    await sql`
+      INSERT INTO productivity_metrics (user_id, date, tasks_completed, tasks_assigned, total_work_time, productivity_score)
+      VALUES (${m.user_id}, CURRENT_DATE - INTERVAL '25 days', ${m.t_completed}, ${m.t_assigned}, 10800, ${m.score})
+      ON CONFLICT (user_id, date) DO NOTHING
+    `;
+  }
+
+  const metricsPostTraining = [
     { user_id: ID.ana,   t_completed: 1, t_assigned: 2, score: 72 },
     { user_id: ID.juan,  t_completed: 1, t_assigned: 2, score: 65 },
     { user_id: ID.maria, t_completed: 0, t_assigned: 1, score: 50 },
     { user_id: ID.pedro, t_completed: 0, t_assigned: 1, score: 45 },
     { user_id: ID.lucia, t_completed: 0, t_assigned: 0, score: 30 },
   ];
-  for (const m of metrics) {
+  for (const m of metricsPostTraining) {
     await sql`
       INSERT INTO productivity_metrics (user_id, date, tasks_completed, tasks_assigned, total_work_time, productivity_score)
       VALUES (${m.user_id}, CURRENT_DATE, ${m.t_completed}, ${m.t_assigned}, 14400, ${m.score})
@@ -380,10 +397,13 @@ async function seed() {
 
   // ── 18. ROI SNAPSHOTS ─────────────────────────────────────────────────────
   console.log('→ training_roi_snapshots');
+  // avg_prod = productivity_score pre-training (día -25)
+  // avg_eval = 0 (ningún usuario tenía evaluaciones completadas al inicio del programa)
+  // task_pct = 0 (las tareas se asignaron 10 días atrás, después del snapshot)
   const snapshots = [
-    { user_id: ID.ana,   line_id: ID.tlFrontend, avg_prod: 62, avg_eval: 70, task_pct: 50, cost: 2500 },
-    { user_id: ID.lucia, line_id: ID.tlFrontend, avg_prod: 30, avg_eval: 0,  task_pct: 0,  cost: 2500 },
-    { user_id: ID.maria, line_id: ID.tlQA,       avg_prod: 50, avg_eval: 0,  task_pct: 0,  cost: 4100 },
+    { user_id: ID.ana,   line_id: ID.tlFrontend, avg_prod: 55, avg_eval: 0, task_pct: 0, cost: 2500 },
+    { user_id: ID.lucia, line_id: ID.tlFrontend, avg_prod: 20, avg_eval: 0, task_pct: 0, cost: 2500 },
+    { user_id: ID.maria, line_id: ID.tlQA,       avg_prod: 38, avg_eval: 0, task_pct: 0, cost: 4100 },
   ];
   for (const s of snapshots) {
     await sql`
